@@ -2,8 +2,11 @@ require 'spec_helper'
 
 describe "simple_beat" do
   let(:hostname) { "127.0.0.1" }
+  let(:pid) { "123" }
+  let(:identifier) { [hostname,pid].join(":") }
+
   before(:each) do
-    SimpleBeat::HostnameFetcher.stub(:hostname) { hostname }
+    SimpleBeat.stub(:identifier) { identifier }
 
     SimpleBeat.redis = Redis.new
     SimpleBeat.namespace = "test"
@@ -12,14 +15,14 @@ describe "simple_beat" do
 
   describe "simple" do
     it "knows that hosts which have never beat are dead" do
-      SimpleBeat.alive?(hostname).should == false
+      SimpleBeat.alive?(identifier).should == false
     end
 
     it "knows that beating hosts are alive" do
       beat = SimpleBeat::Beat.new
       beat.beat
       
-      SimpleBeat.alive?(hostname).should == true
+      SimpleBeat.alive?(identifier).should == true
     end
 
     it "knows that hosts which beat longer than threshold ago are dead" do
@@ -28,7 +31,7 @@ describe "simple_beat" do
 
       current_time = Time.now
       Time.stub(:now) { current_time + 600 }
-      SimpleBeat.alive?(hostname).should == false
+      SimpleBeat.alive?(identifier).should == false
     end
   end
 
@@ -37,7 +40,7 @@ describe "simple_beat" do
       beat = SimpleBeat::Beat.new
       beat.beat
 
-      SimpleBeat.recent_beats.has_key?(hostname).should == true
+      SimpleBeat.recent_beats.has_key?(identifier).should == true
     end
 
     it "ignore hosts that haven't beat recently" do
@@ -46,7 +49,7 @@ describe "simple_beat" do
 
       current_time = Time.now
       Time.stub(:now) { current_time + 600 }
-      SimpleBeat.recent_beats.has_key?(hostname).should == false
+      SimpleBeat.recent_beats.has_key?(identifier).should == false
     end
   end
 
@@ -59,7 +62,7 @@ describe "simple_beat" do
       Time.stub(:now) { current_time + 600 }
 
       SimpleBeat.prune_beats(120)
-      SimpleBeat.alive?(hostname, 7200).should == false
+      SimpleBeat.alive?(identifier, 7200).should == false
     end
   end
 
@@ -70,7 +73,7 @@ describe "simple_beat" do
       beat = SimpleBeat::Beat.new
       beat.beat
 
-      SimpleBeat.last_beat(hostname).should == 1
+      SimpleBeat.last_beat(identifier).should == 1
     end
   end
 
@@ -82,7 +85,7 @@ describe "simple_beat" do
       end
 
       beat.beat
-      SimpleBeat.recent_beats[hostname]['revision'].should == "abc"
+      SimpleBeat.recent_beats[identifier]['revision'].should == "abc"
     end
   end
 

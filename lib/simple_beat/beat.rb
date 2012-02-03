@@ -1,11 +1,7 @@
 module SimpleBeat
   class Beat
-    def initialize
-      @hostname   = HostnameFetcher.hostname
-    end
-
     def beat
-      SimpleBeat.data_store.record_beat(@hostname, attributes)
+      SimpleBeat.data_store.record_beat(attributes)
       @on_beat.call if @on_beat
     end
 

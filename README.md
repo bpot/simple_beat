@@ -17,7 +17,7 @@ A simple heart beat library for ruby daemons using redis
     end
     
     # #beat_attributes allows you to define other key value pairs to store on 
-    # each beat.  By default it just sends the 'hostname' and 'timestamp'.
+    # each beat.  By default it just sends the 'hostname', 'pid' and 'timestamp'.
     sb.addition_attributes do
       { 'revision' => "abc", 'load' => Load.get }
     end
@@ -35,21 +35,21 @@ A simple heart beat library for ruby daemons using redis
 
 ### Query heartbeats
 
-    # => { hostname => attributes }
+    # => { process_identifier => attributes }
     SimpleBeat.recent_beats(threshold = 300)
 
     # Prune heartbeats old than seconds 'threshold'
     SimpleBeat.prune_beats(threshold = 300)
 
-    # Have we recieved a heartbeat from 'hostname' in the last 'threshold' seconds
-    SimpleBeat.alive?(hostname, threshold = 120)
+    # Have we recieved a heartbeat from 'identifier' in the last 'threshold' seconds
+    SimpleBeat.alive?(identifier, threshold = 120)
 
     # Returns time of last beat
-    SimpleBeat.last_beat_at(hostname)
+    SimpleBeat.last_beat_at(identifier)
 
 
 ## Redis storage
 
-    Heartbeats are stored in a hash with the hostname as the key and attributes as the value
+    Heartbeats are stored in a hash with the hostname:pid as the key and attributes as the value
 
-    redis.hset(simple_beat_hash, hostname, attributes)
+    redis.hset(simple_beat_hash, "#{hostname}:#{pid}", attributes)
