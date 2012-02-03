@@ -6,7 +6,10 @@ A simple heart beat library for ruby daemons using redis
 
 ### Client
 
-    sb = SimpleBeat.new(:beat_period => 60, :namespace => 'my-app')
+    SimpleBeat.redis = Redis.new
+    SimpleBeat.namespace = 'my-app'
+
+    sb = SimpleBeat.new
 
     # The #on_beat handler allows you to do additional actions on each beat
     sb.on_beat do
